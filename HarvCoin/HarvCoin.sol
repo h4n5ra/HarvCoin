@@ -4,7 +4,7 @@ contract HarvCoin{
     
     string public constant symbol = "HSH";
     string public constant name = "HarvCoin";
-    uint8 public constant decimals = 3;
+    uint8 public constant decimals = 0;
     uint public constant _totalSupply = 1000000;
     address private contractOwner;
     
@@ -43,8 +43,15 @@ contract HarvCoin{
         _;
     }
     
+    /* ensures there is overflow on the receiver's side*/
+    modifier overflows(address to, uint value){
+        uint delta = coinBase[to] + value;
+        require(delta > coinBase[to]);
+        _;
+    }
+    
     /* allows an adddress to transfer coins to another address*/
-    function transfer(address to, uint tokens) hasEnough(msg.sender, tokens) isPositive(tokens) public returns (bool){
+    function transfer(address to, uint tokens) isPositive(tokens) hasEnough(msg.sender, tokens) overflows(to, tokens) public returns (bool){
         coinBase[msg.sender] -= tokens;
         coinBase[to] += tokens;
         Transfer(msg.sender, to, tokens);
@@ -65,7 +72,7 @@ contract HarvCoin{
     }
     
     /* transfer tokens from another address the user as approval from to a specified address*/
-    function transferFrom(address from, address to, uint tokens) hasEnough(from, tokens) isPositive(tokens) public returns (bool success){
+    function transferFrom(address from, address to, uint tokens) isPositive(tokens) hasEnough(from, tokens) overflows(to, tokens) public returns (bool success){
         coinBase[from] -= tokens;
         allowed[from][msg.sender] -= tokens;
         coinBase[to] += tokens;
