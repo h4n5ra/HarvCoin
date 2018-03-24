@@ -1,29 +1,32 @@
 pragma solidity ^0.4.20;
 
-import "./ERC20Interface.sol";
-
-contract HarvCoin is ERC20Interface{
+contract HarvCoin{
     
     string public constant symbol = "HSH";
     string public constant name = "HarvCoin";
     uint8 public constant decimals = 3;
     uint public constant _totalSupply = 1000000;
+    address private contractOwner;
     
     mapping(address => uint) coinBase;
     mapping(address => mapping(address => uint)) allowed;
     
+    event Transfer(address indexed from, address indexed to, uint tokens);
+    event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
+    
     /* gives all tokens to the contract creator*/
     function HarvCoin(){
-        coinBase[msg.sender] = _totalSupply;
+        contractOwner = msg.sender;
+        coinBase[contractOwner] = _totalSupply;
     }
     
     /* returns the total number of coins ever*/
-    function totalSupply() public constant returns (uint){
+    function totalSupply() public view returns (uint){
         return _totalSupply;
     }
     
     /* returns the balance of an address */
-    function balanceOf(address tokenOwner) public constant returns (uint){
+    function balanceOf(address tokenOwner) public view returns (uint){
         return coinBase[tokenOwner];
     }
     
@@ -39,7 +42,7 @@ contract HarvCoin is ERC20Interface{
         require(value > 0);
         _;
     }
-
+    
     /* allows an adddress to transfer coins to another address*/
     function transfer(address to, uint tokens) hasEnough(msg.sender, tokens) isPositive(tokens) public returns (bool){
         coinBase[msg.sender] -= tokens;
@@ -50,7 +53,7 @@ contract HarvCoin is ERC20Interface{
     }
     
     /* returns the amount of coins the address can send */
-    function allowance(address tokenOwner, address spender) public constant returns (uint) {
+    function allowance(address tokenOwner, address spender) public view returns (uint) {
         return allowed[tokenOwner][spender];
     }
     
@@ -70,8 +73,4 @@ contract HarvCoin is ERC20Interface{
         return true;
     }
     
-    event Transfer(address indexed from, address indexed to, uint tokens);
-    event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
-    
-
 }
