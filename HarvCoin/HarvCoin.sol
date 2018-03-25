@@ -15,13 +15,13 @@ contract HarvCoin{
     event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
     
     /* gives all tokens to the contract creator*/
-    function HarvCoin(){
+    function HarvCoin() public{
         contractOwner = msg.sender;
         coinBase[contractOwner] = _totalSupply;
     }
     
     /* returns the total number of coins ever*/
-    function totalSupply() public view returns (uint){
+    function totalSupply() public pure returns (uint){
         return _totalSupply;
     }
     
@@ -54,7 +54,7 @@ contract HarvCoin{
     function transfer(address to, uint tokens) isPositive(tokens) hasEnough(msg.sender, tokens) overflows(to, tokens) public returns (bool){
         coinBase[msg.sender] -= tokens;
         coinBase[to] += tokens;
-        Transfer(msg.sender, to, tokens);
+        emit Transfer(msg.sender, to, tokens);
         return true;
         
     }
@@ -67,7 +67,7 @@ contract HarvCoin{
     /*gives permission to address to transfer tokens on the senders behalf*/
     function approve(address spender, uint tokens) public returns (bool) {
         allowed[msg.sender][spender] = tokens;
-        Approval(msg.sender, spender, tokens);
+        emit Approval(msg.sender, spender, tokens);
         return true;
     }
     
@@ -76,7 +76,7 @@ contract HarvCoin{
         coinBase[from] -= tokens;
         allowed[from][msg.sender] -= tokens;
         coinBase[to] += tokens;
-        Transfer(from, to, tokens);
+        emit Transfer(from, to, tokens);
         return true;
     }
     
