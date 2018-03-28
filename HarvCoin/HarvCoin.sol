@@ -65,14 +65,20 @@ contract HarvCoin{
     }
     
     /*gives permission to address to transfer tokens on the senders behalf*/
-    function approve(address spender, uint tokens) public returns (bool) {
+    function approve(address spender, uint tokens) isPositive(tokens) hasEnough(msg.sender, tokens) public returns (bool) {
         allowed[msg.sender][spender] = tokens;
         emit Approval(msg.sender, spender, tokens);
         return true;
     }
     
+    /* ensures the sender is approved to send the desired number of tokens on another address's behalf*/
+    modifier isAllowed(address from, uint tokens){
+        require(allowed[from][msg.sender] >= tokens);
+        _;
+    }
+    
     /* transfer tokens from another address the user as approval from to a specified address*/
-    function transferFrom(address from, address to, uint tokens) isPositive(tokens) hasEnough(from, tokens) overflows(to, tokens) public returns (bool success){
+    function transferFrom(address from, address to, uint tokens) isPositive(tokens) isAllowed(from, tokens) hasEnough(from, tokens) overflows(to, tokens) public returns (bool success){
         coinBase[from] -= tokens;
         allowed[from][msg.sender] -= tokens;
         coinBase[to] += tokens;
