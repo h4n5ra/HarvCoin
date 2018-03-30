@@ -71,6 +71,11 @@ contract HarvCoin{
         return true;
     }
     
+    /* removes any approval to transfer tokens on behalf of the message sender for the given address */
+    function removeApproval(address spender) public view{
+        allowed[msg.sender][spender] = 0;
+    }
+    
     /* ensures the sender is approved to send the desired number of tokens on another address's behalf*/
     modifier isAllowed(address from, uint tokens){
         require(allowed[from][msg.sender] >= tokens);
